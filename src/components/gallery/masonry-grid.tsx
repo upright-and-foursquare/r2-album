@@ -211,13 +211,16 @@ export function MasonryGrid() {
         open={Boolean(lightboxImage)}
         onOpenChange={(open) => !open && setLightboxImage(null)}
       >
-        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+        <DialogContent
+          showCloseButton={false}
+          className="w-full max-w-[calc(100%-2rem)] overflow-hidden p-0 sm:max-w-4xl"
+        >
           {lightboxImage && (
             <>
               <DialogTitle className="sr-only">
                 {lightboxImage.originalFilename}
               </DialogTitle>
-              <div className="relative">
+              <div className="relative min-w-0">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -226,7 +229,7 @@ export function MasonryGrid() {
                 >
                   <X className="size-4" />
                 </Button>
-                <div className="relative h-[80vh] w-full bg-black/5">
+                <div className="relative h-[80vh] w-full min-w-0 overflow-hidden bg-black/5">
                   <Image
                     src={lightboxImage.url}
                     alt={lightboxImage.originalFilename}
