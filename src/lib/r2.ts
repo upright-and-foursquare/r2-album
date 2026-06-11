@@ -146,8 +146,8 @@ export async function generatePresignedUploadUrl(
   const metadata: Record<string, string> = {
     "original-filename": filename,
   };
-  if (width) metadata.width = String(width);
-  if (height) metadata.height = String(height);
+  if (width != null) metadata.width = String(width);
+  if (height != null) metadata.height = String(height);
 
   const command = new PutObjectCommand({
     Bucket: bucketName,
@@ -156,15 +156,22 @@ export async function generatePresignedUploadUrl(
     Metadata: metadata,
   });
 
+  const unhoistableHeaders = new Set(
+    Object.keys(metadata).map((metaKey) => `x-amz-meta-${metaKey}`)
+  );
+
   const uploadUrl = await getSignedUrl(client, command, {
     expiresIn: 3600,
     signableHeaders: new Set(["content-type"]),
+    unhoistableHeaders,
   });
 
-  // Metadata is embedded in the presigned URL query string; only sign Content-Type.
   const headers: Record<string, string> = {
     "Content-Type": contentType,
   };
+  for (const [metaKey, value] of Object.entries(metadata)) {
+    headers[`x-amz-meta-${metaKey}`] = value;
+  }
 
   return {
     key,
