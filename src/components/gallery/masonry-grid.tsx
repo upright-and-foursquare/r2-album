@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Masonry from "react-masonry-css";
 import { Copy, Loader2, RefreshCw, X } from "lucide-react";
@@ -20,6 +21,16 @@ const BREAKPOINTS = {
   768: 2,
   480: 1,
 };
+
+const GRID_IMAGE_SIZES =
+  "(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw";
+
+function getAspectRatio(image: ImageRecord): string {
+  if (image.width && image.height) {
+    return `${image.width} / ${image.height}`;
+  }
+  return "3 / 4";
+}
 
 export function MasonryGrid() {
   const [images, setImages] = useState<ImageRecord[]>([]);
@@ -84,7 +95,9 @@ export function MasonryGrid() {
 
   useEffect(() => {
     initialLoadDoneRef.current = false;
-    fetchRandom();
+    queueMicrotask(() => {
+      void fetchRandom();
+    });
 
     return () => {
       abortRef.current?.abort();
@@ -166,16 +179,22 @@ export function MasonryGrid() {
             key={image.key}
             type="button"
             onClick={() => setLightboxImage(image)}
-            className="group relative overflow-hidden rounded-xl border border-border/70 bg-muted/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+            className="group relative w-full overflow-hidden rounded-xl border border-border/70 bg-muted/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={image.url}
-              alt={image.originalFilename}
-              className="w-full object-cover transition-transform group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+            <div
+              className="relative w-full"
+              style={{ aspectRatio: getAspectRatio(image) }}
+            >
+              <Image
+                src={image.url}
+                alt={image.originalFilename}
+                fill
+                sizes={GRID_IMAGE_SIZES}
+                quality={75}
+                className="object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
               <p className="truncate text-xs text-white">
                 {image.originalFilename}
               </p>
@@ -207,12 +226,17 @@ export function MasonryGrid() {
                 >
                   <X className="size-4" />
                 </Button>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={lightboxImage.url}
-                  alt={lightboxImage.originalFilename}
-                  className="max-h-[80vh] w-full object-contain"
-                />
+                <div className="relative h-[80vh] w-full bg-black/5">
+                  <Image
+                    src={lightboxImage.url}
+                    alt={lightboxImage.originalFilename}
+                    fill
+                    sizes="(max-width: 896px) 100vw, 896px"
+                    quality={85}
+                    priority
+                    className="object-contain"
+                  />
+                </div>
                 <div className="flex items-center justify-between border-t p-4">
                   <p className="truncate text-sm font-medium">
                     {lightboxImage.originalFilename}
