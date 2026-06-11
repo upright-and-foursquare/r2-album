@@ -56,6 +56,9 @@ export function getS3Client(): S3Client {
         accessKeyId,
         secretAccessKey,
       },
+      // Browser XHR uploads cannot satisfy SDK default CRC32 checksums.
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
   }
   return s3Client;
@@ -153,14 +156,15 @@ export async function generatePresignedUploadUrl(
     Metadata: metadata,
   });
 
-  const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
+  const uploadUrl = await getSignedUrl(client, command, {
+    expiresIn: 3600,
+    signableHeaders: new Set(["content-type"]),
+  });
 
+  // Metadata is embedded in the presigned URL query string; only sign Content-Type.
   const headers: Record<string, string> = {
     "Content-Type": contentType,
-    "x-amz-meta-original-filename": filename,
   };
-  if (width) headers["x-amz-meta-width"] = String(width);
-  if (height) headers["x-amz-meta-height"] = String(height);
 
   return {
     key,
