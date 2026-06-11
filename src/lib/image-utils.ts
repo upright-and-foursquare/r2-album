@@ -15,6 +15,19 @@ const ALLOWED_EXTENSIONS = new Set([
   "avif",
 ]);
 
+export function generateUuid(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 export function isImageKey(key: string): boolean {
   if (!key || key.endsWith("/")) return false;
   const ext = key.split(".").pop()?.toLowerCase() ?? "";
@@ -124,7 +137,7 @@ export function getFolderName(path: string): string {
 }
 
 export function generateObjectKey(filename: string, folder = ""): string {
-  const uuid = crypto.randomUUID();
+  const uuid = generateUuid();
   const sanitized = sanitizeFilename(filename);
   const prefix = folder ? normalizeFolderPath(folder) : "";
   return `${prefix}${uuid}-${sanitized}`;

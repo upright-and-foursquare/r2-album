@@ -11,15 +11,12 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   formatFileSize,
+  generateUuid,
   readImageDimensions,
   validateImageFile,
 } from "@/lib/image-utils";
 import type { PresignResponse, UploadFileItem } from "@/types/image";
 import { cn } from "@/lib/utils";
-
-function createFileId(): string {
-  return crypto.randomUUID();
-}
 
 function uploadWithProgress(
   file: File,
@@ -85,7 +82,7 @@ export function UploadZone() {
         continue;
       }
       newItems.push({
-        id: createFileId(),
+        id: generateUuid(),
         file,
         status: "pending",
         progress: 0,
