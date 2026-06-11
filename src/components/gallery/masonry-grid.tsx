@@ -213,7 +213,7 @@ export function MasonryGrid() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-[calc(100%-2rem)] overflow-hidden p-0 sm:max-w-4xl"
+          className="block w-[min(56rem,calc(100vw-2rem))] max-w-none overflow-hidden p-0 sm:max-w-none"
         >
           {lightboxImage && (
             <>
@@ -229,19 +229,20 @@ export function MasonryGrid() {
                 >
                   <X className="size-4" />
                 </Button>
-                <div className="relative h-[80vh] w-full min-w-0 overflow-hidden bg-black/5">
+                <div className="flex max-h-[80vh] min-h-[12rem] w-full items-center justify-center overflow-hidden bg-black/5">
                   <Image
                     src={lightboxImage.url}
                     alt={lightboxImage.originalFilename}
-                    fill
+                    width={lightboxImage.width ?? 1600}
+                    height={lightboxImage.height ?? 1200}
                     sizes="(max-width: 896px) 100vw, 896px"
                     quality={85}
                     priority
-                    className="object-contain"
+                    className="max-h-[80vh] max-w-full object-contain"
                   />
                 </div>
-                <div className="flex items-center justify-between border-t p-4">
-                  <p className="truncate text-sm font-medium">
+                <div className="flex min-w-0 items-center justify-between gap-3 border-t p-4">
+                  <p className="min-w-0 flex-1 truncate text-sm font-medium">
                     {lightboxImage.originalFilename}
                   </p>
                   <Button
